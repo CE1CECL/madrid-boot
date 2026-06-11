@@ -848,6 +848,39 @@ void boot_nand(void)
 	}
 }
 
+void boot_sd0(void)
+{
+	struct disk_partition partitions[4];
+	global_var * gptr = get_global();
+	FW_DEBUG_0_ON;
+	gptr->found_sd0 = disk_load_mbr(SDHC0_BASE, io_buffer, partitions) == 0;
+	if (gptr->found_sd0) {
+		serio_puts("SD0 found\n");
+		/* construct the command line */
+		strcpy(gptr->cmdline_buffer, CMDLINE_BASE);
+		strcat(gptr->cmdline_buffer, gptr->ram_cmdline);
+		if (gptr->display_info) {
+			strcat(gptr->cmdline_buffer, "screen_module=");
+			strcat(gptr->cmdline_buffer, gptr->display_info->name);
+			strcat(gptr->cmdline_buffer, " ");
+		}
+		strcat(gptr->cmdline_buffer, CMDLINE_RFS_SD0);
+		/* Read in */
+		//FW_DEBUG_1_ON;	// disk_load_mbr() costs 350msec
+		gptr->image = load_sd(SDHC0_BASE, partitions, io_buffer,
+				gptr->params_buffer);
+		if (gptr->image) {
+			serio_puts ("SD0 kernel passes CBF\n");
+		}
+		else {
+			serio_puts ("SD0 kernel fails CBF\n");
+		}
+	}
+	else {
+		serio_puts("No SD0 found\n");
+	}
+}
+
 
 void boot_sd1(void)
 {
@@ -879,6 +912,17 @@ void boot_sd1(void)
 	}
 	else {
 		serio_puts("No SD1 found\n");
+	}
+}
+
+
+void boot_sd(void)
+{
+	global_var * gptr = get_global();
+	boot_sd0();
+	if (gptr->image == 0)
+	{
+		boot_sd1();
 	}
 }
 
@@ -1054,6 +1098,7 @@ void main(void)
 	if (    IS_SET(REG32(MCU_S_BASE+NFCONTROL),NFBOOTENB)
 		|| !isMadrid(gptr->board_id))
 	{
+		boot_sd();
 		if ( !gptr->image ) {
 			search_for_nand();
 			if ( gptr->found_nand )
@@ -1066,7 +1111,12 @@ void main(void)
 	else	// new: call boot_sd1() only if (isMadrid() && not a NAND boot) 
 #endif
 	{
-		boot_sd1();
+		boot_sd();
+		if ( !gptr->image ) {
+			search_for_nand();
+			if ( gptr->found_nand )
+				boot_nand();
+		}
 	}
 
 	/* Nothing found? */

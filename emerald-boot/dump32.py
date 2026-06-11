@@ -5,11 +5,11 @@ import array
 
 for fin in sys.argv[1:]:
     fout=fin + ".h"
-    hin=open(fin)
+    hin=open(fin, "rb")
     hout=open(fout, "w")
     raw=hin.read()
     hin.close()
-    data=array.array ('L', raw)
+    data=array.array ('I', raw)
     j=0
     for i in data:
         hout.write("0x%08x," % i)

@@ -316,6 +316,11 @@ DisableInterrupts:
 
     /* After power-on or reset, execution starts here */
 ResetHandler:
+	ldr	r3, =0xC0015874
+	ldr	r2, [r3]
+	orr	r2, r2, #0x020
+	str	r2, [r3]
+
 	/* Enable I-Cache, copied from VTK/Bootloader/NandBoot/startup.s */
 	MRC     p15,0,r0,c1,c0,0
 	ORR     r0,r0,#(1<<12)

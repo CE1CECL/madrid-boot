@@ -1,6 +1,6 @@
 CROSS_COMPILE ?= arm-linux-uclibcgnueabi-
 OPT=-Os
-CFLAGS = -ggdb -std=gnu99 -mcpu=arm926ej-s -mlittle-endian -msoft-float -ffreestanding $(OPT) -Wall -Werror -pedantic -Wno-variadic-macros -D_LF1000_BOOTLOADER -DSELF_BOOTSTRAP -fPIC -fno-builtin -I./include
+CFLAGS = -ggdb -std=gnu99 -mcpu=arm926ej-s -mlittle-endian -msoft-float -ffreestanding $(OPT) -Wall -pedantic -Wno-variadic-macros -D_LF1000_BOOTLOADER -fPIC -fno-builtin -I./include
 LDFLAGS = -static --architecture armv5te -EL -M -Map boot.map -e StartUp -T emerald-boot.lds
 
 # nand_utils.o and nand_boot.o must be in the first 2K.
@@ -40,12 +40,12 @@ LPAD_RES = -DFB_VIRTUAL_XRES=480 -DFB_VIRTUAL_YRES=272
 # CFLAGS += -DMMC_DEBUG -DDEBUG
 
 # debug printing support
-ifneq ($(DEBUG),)
+ifeq ($(DEBUG),1)
 CFLAGS += -DDEBUG
 endif
 
 # debug stopwatch support
-ifneq ($(DEBUG_STOPWATCH),)
+ifeq ($(DEBUG_STOPWATCH),1)
 CFLAGS += -DDEBUG_STOPWATCH
 endif
 
@@ -67,6 +67,10 @@ CFLAGS += -DBPP=4
 
 # Force support for integer division for nand_ecc
 CFLAGS += -DCONFIG_AEABI
+
+ifeq ($(SELF_BOOTSTRAP),1)
+CFLAGS += -DSELF_BOOTSTRAP
+endif
 
 # FIXME
 HT=../host_tools/rle/

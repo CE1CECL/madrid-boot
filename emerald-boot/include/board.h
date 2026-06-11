@@ -54,7 +54,7 @@
 /*
  * minimum voltage for booting (with backlight on), in mV
  */
-#define BOOT_MIN_MV	4000	/* below this the system may continuously reboot */
+#define BOOT_MIN_MV	0000	/* below this the system may continuously reboot */
 #define BOOT_LOW_BATT	4400	/* warn the batteries are low			 */
 
 /*
@@ -84,7 +84,7 @@
 #define BOOT_SIZE	(P2_SIZE)
 
 /* memory reserved for frame buffers (graphics) */
-#define BOARD_MLC_RESERVE_MEMORY	18
+#define BOARD_MLC_RESERVE_MEMORY	4
 
 /* 
  * Kernel Command Line settings 
